@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+
 /**
  * {@link PrimeNumbers} provides an API to work with prime numbers. The implementation is based on the
  * {@link java.util.stream.IntStream} of prime numbers. That stream is used in all public methods on this class.
@@ -30,7 +33,9 @@ public class PrimeNumbers {
      * @return an infinite int stream of prime numbers
      */
     public static IntStream stream() {
-        throw new ExerciseNotCompletedException(); // todo: create an infinite stream of ints, then filter prime numbs
+        return IntStream.iterate(2, i -> i + 1)
+                .filter(PrimeNumbers::isPrime);
+        // todo: create an infinite stream of ints, then filter prime numbs
     }
 
     /**
@@ -40,7 +45,8 @@ public class PrimeNumbers {
      * @return an int stream of prime numbers with a specified size
      */
     public static IntStream stream(int size) {
-        throw new ExerciseNotCompletedException(); // todo: use the prev to generate a stream method but limit its size
+        return stream().limit(size);
+        // todo: use the prev to generate a stream method but limit its size
     }
 
     /**
@@ -51,8 +57,8 @@ public class PrimeNumbers {
      * @return the sum of n prime numbers
      */
     public static int sum(int n) {
-        throw new ExerciseNotCompletedException(); // todo: use prev method and calculate the sum
-
+        return stream(n).sum();
+        // todo: use prev method and calculate the sum
     }
 
     /**
@@ -61,7 +67,8 @@ public class PrimeNumbers {
      * @return a list of collected prime numbers
      */
     public static List<Integer> list(int n) {
-        throw new ExerciseNotCompletedException(); // todo: collect prime numbers into the list
+        return stream(n).boxed().collect(toList());
+        // todo: collect prime numbers into the list
     }
 
     /**
@@ -71,11 +78,12 @@ public class PrimeNumbers {
      * @param consumer a logic that should be applied to the found prime number
      */
     public static void processByIndex(int idx, IntConsumer consumer) {
-        throw new ExerciseNotCompletedException(); // todo: find an element in the stream by index and process it
+        stream().skip(idx).findFirst().ifPresent(consumer);
+        // todo: find an element in the stream by index and process it
     }
 
     /**
-     * Creates a list of n prime numbers and returns a map where all of those prime numbers are groped. The key represents
+     * Creates a list of n prime numbers and returns a map where all of those prime numbers are grouped. The key represents
      * an amount of digits and the value is a corresponding list of all prime numbers.
      * <p>
      * So if you will call this method for with argument 20, you will receive the following map:
@@ -85,6 +93,22 @@ public class PrimeNumbers {
      * @return a map with prime number grouped by the amount of digits
      */
     public static Map<Integer, List<Integer>> groupByAmountOfDigits(int n) {
-        throw new ExerciseNotCompletedException(); // todo: group n prime numbers by the amount of digits
+        return stream(n)
+                .boxed()
+                .collect(groupingBy(num -> String.valueOf(num).length()));
+        // todo: group n prime numbers by the amount of digits
+    }
+
+    private static boolean isPrime(int n) {
+        if (n <= 1) return false;
+        if (n == 2) return true;
+        if (n % 2 == 0) return false;
+
+        for (int i = 3; i <= Math.sqrt(n); i += 2) {
+            if (n % i == 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }

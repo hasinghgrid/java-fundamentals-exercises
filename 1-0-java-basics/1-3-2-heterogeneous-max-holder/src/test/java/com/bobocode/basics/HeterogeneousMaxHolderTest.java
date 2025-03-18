@@ -110,13 +110,19 @@ class HeterogeneousMaxHolderTest {
     void putMethodAcceptsValueParameterWithComparableSuperClass() {
         var putMethod = getPutMethod();
 
+        // Get the generic type parameter of the comparator
         var typeParam = putMethod.getTypeParameters()[0];
         var boundType = (ParameterizedType) typeParam.getBounds()[0];
-        var typeArgument = boundType.getActualTypeArguments()[0].getTypeName();
 
+        // Check that the comparator's raw type is Comparable
         assertThat(boundType.getRawType()).isEqualTo(Comparable.class);
-        assertThat(typeArgument).isEqualTo("? super T");
+
+        // The comparator's argument type should be a supertype of T (i.e., ? super T)
+        assertThat(boundType.getActualTypeArguments()[0].getTypeName()).isEqualTo("? super T");
     }
+
+
+
 
     @Test
     @Order(9)

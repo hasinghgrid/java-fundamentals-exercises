@@ -472,6 +472,7 @@ public class CrazyGenericsTest {
         assertThat(comparableInterface).isNotNull();
     }
 
+
     @Test
     @Order(42)
     @DisplayName("Collection of any type is specified as type parameter for a super interface Comparable")

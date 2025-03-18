@@ -1,5 +1,7 @@
 package com.bobocode.basics;
 
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -15,7 +17,7 @@ import java.util.Map;
  * @author Taras Boychuk
  */
 public class HeterogeneousMaxHolder {
-
+    private final Map<Class<?>, Object> maxValues = new HashMap<>();
     /**
      * A method put stores a provided value by its type, if the value is greater than the current maximum. In other words, the logic
      * of this method makes sure that only max value is stored and everything else is ignored.
@@ -31,6 +33,17 @@ public class HeterogeneousMaxHolder {
      * @return a smaller value among the provided value and the current maximum
      */
     // todo: implement a method according to javadoc
+    public <T extends Comparable<? super T>> T put(Class<T> key, T value) {
+        // Get the current max for this type, safely cast it to T
+        T currentMax = (T) maxValues.get(key); // Unchecked cast, but we handle this with null checks
+        // If there is no current max or the provided value is greater, update the map
+        if (currentMax == null || value.compareTo(currentMax) > 0) {
+            maxValues.put(key, value);
+            return currentMax;
+        }
+        // Return the smaller of the two values
+        return value;
+    }
 
     /**
      * An overloaded method put implements the same logic using a custom comparator. A given comparator is wrapped with
@@ -45,6 +58,17 @@ public class HeterogeneousMaxHolder {
      * @return a smaller value among the provided value and the current maximum
      */
     // todo: implement a method according to javadoc
+    public <T> T put(Class<T> key, T value, Comparator<? super T> comparator) {
+        // Get the current max value for this type
+        T currentMax = (T) maxValues.get(key); // Unchecked cast, but we handle this with null checks
+        // If there is no current max or the provided value is greater based on the comparator, update the map
+        if (currentMax == null || comparator.compare(value, currentMax) > 0) {
+            maxValues.put(key, value);
+            return currentMax;
+        }
+        // Return the smaller of the two values based on the comparator
+        return value;
+    }
 
     /**
      * A method getMax returns a max value by the given type. If no value is stored by this type, then it returns null.
@@ -54,4 +78,8 @@ public class HeterogeneousMaxHolder {
      * @return current max value or null
      */
     // todo: implement a method according to javadoc
+    public <T> T getMax(Class<T> key) {
+        // Safely cast the object stored in the map to the appropriate type
+        return key.cast(maxValues.get(key)); // Use Class.cast to avoid unchecked casts
+    }
 }

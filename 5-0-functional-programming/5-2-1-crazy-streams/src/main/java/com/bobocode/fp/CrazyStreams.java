@@ -1,12 +1,14 @@
 package com.bobocode.fp;
 
+import com.bobocode.fp.exception.EntityNotFoundException;
 import com.bobocode.model.Account;
-import com.bobocode.util.ExerciseNotCompletedException;
 import lombok.AllArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Month;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * {@link CrazyStreams} is an exercise class. Each method represent some operation with a collection of accounts that
@@ -30,7 +32,8 @@ public class CrazyStreams {
      * @return account with max balance wrapped with optional
      */
     public Optional<Account> findRichestPerson() {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .max(Comparator.comparing(Account::getBalance)); // Verify: ensure getBalance() exists
     }
 
     /**
@@ -40,7 +43,9 @@ public class CrazyStreams {
      * @return a list of accounts
      */
     public List<Account> findAccountsByBirthdayMonth(Month birthdayMonth) {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .filter(account -> account.getBirthday().getMonth() == birthdayMonth) // Verify: ensure getBirthday() returns LocalDate
+                .collect(Collectors.toList());
     }
 
     /**
@@ -50,7 +55,7 @@ public class CrazyStreams {
      * @return a map where key is true or false, and value is list of male, and female accounts
      */
     public Map<Boolean, List<Account>> partitionMaleAccounts() {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream().collect(Collectors.partitioningBy(account -> "MALE".equalsIgnoreCase(String.valueOf(account.getSex()))));
     }
 
     /**
@@ -60,7 +65,9 @@ public class CrazyStreams {
      * @return a map where key is an email domain and value is a list of all account with such email
      */
     public Map<String, List<Account>> groupAccountsByEmailDomain() {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .collect(Collectors.groupingBy(
+                        account -> account.getEmail().split("@")[1])); // Verify: ensure getEmail() exists
     }
 
     /**
@@ -69,7 +76,9 @@ public class CrazyStreams {
      * @return total number of letters of first and last names of all accounts
      */
     public int getNumOfLettersInFirstAndLastNames() {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .mapToInt(account -> account.getFirstName().length() + account.getLastName().length()) // Verify: ensure getFirstName() and getLastName()
+                .sum();
     }
 
     /**
@@ -78,7 +87,9 @@ public class CrazyStreams {
      * @return total balance of all accounts
      */
     public BigDecimal calculateTotalBalance() {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .map(Account::getBalance) // Verify: ensure getBalance() exists
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     /**
@@ -87,7 +98,10 @@ public class CrazyStreams {
      * @return list of accounts sorted by first and last names
      */
     public List<Account> sortByFirstAndLastNames() {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .sorted(Comparator.comparing(Account::getFirstName) // Verify: ensure getFirstName() and getLastName()
+                        .thenComparing(Account::getLastName))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -97,7 +111,8 @@ public class CrazyStreams {
      * @return true if there is an account that has an email with provided domain
      */
     public boolean containsAccountWithEmailDomain(String emailDomain) {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .anyMatch(account -> account.getEmail().endsWith("@" + emailDomain)); // Verify: ensure getEmail()
     }
 
     /**
@@ -108,7 +123,12 @@ public class CrazyStreams {
      * @return account balance
      */
     public BigDecimal getBalanceByEmail(String email) {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .filter(account -> account.getEmail().equals(email)) // Verify: ensure getEmail()
+                .findFirst()
+                .map(Account::getBalance) // Verify: ensure getBalance()
+                .orElseThrow(() -> new EntityNotFoundException("Cannot find Account by email=" + email));
+        // Replaced EntityNotFoundException with NoSuchElementException since the former isn't available
     }
 
     /**
@@ -117,7 +137,8 @@ public class CrazyStreams {
      * @return map of accounts by its ids
      */
     public Map<Long, Account> collectAccountsById() {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .collect(Collectors.toMap(Account::getId, account -> account)); // Verify: ensure getId()
     }
 
     /**
@@ -128,7 +149,9 @@ public class CrazyStreams {
      * @return map of account by its ids the were created in a particular year
      */
     public Map<String, BigDecimal> collectBalancesByEmailForAccountsCreatedOn(int year) {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .filter(account -> account.getCreationDate().getYear() == year) // Verify: ensure getCreationDate() returns LocalDate
+                .collect(Collectors.toMap(Account::getEmail, Account::getBalance)); // Verify: ensure getEmail() and getBalance()
     }
 
     /**
@@ -138,7 +161,10 @@ public class CrazyStreams {
      * @return a map where key is a last name and value is a set of first names
      */
     public Map<String, Set<String>> groupFirstNamesByLastNames() {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .collect(Collectors.groupingBy(
+                        Account::getLastName, // Verify: ensure getLastName()
+                        Collectors.mapping(Account::getFirstName, Collectors.toSet()))); // Verify: ensure getFirstName()
     }
 
     /**
@@ -148,7 +174,10 @@ public class CrazyStreams {
      * @return a map where a key is a birthday month and value is comma-separated first names
      */
     public Map<Month, String> groupCommaSeparatedFirstNamesByBirthdayMonth() {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .collect(Collectors.groupingBy(
+                        account -> account.getBirthday().getMonth(), // Verify: ensure getBirthday() returns LocalDate
+                        Collectors.mapping(Account::getFirstName, Collectors.joining(", ")))); // Verify: ensure getFirstName()
     }
 
     /**
@@ -158,7 +187,11 @@ public class CrazyStreams {
      * @return a map where key is a creation month and value is total balance of all accounts created in that month
      */
     public Map<Month, BigDecimal> groupTotalBalanceByCreationMonth() {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .collect(Collectors.groupingBy(
+                        account -> account.getCreationDate().getMonth(), // Verify: ensure getCreationDate() returns LocalDate
+                        Collectors.mapping(Account::getBalance, // Verify: ensure getBalance()
+                                Collectors.reducing(BigDecimal.ZERO, BigDecimal::add))));
     }
 
     /**
@@ -168,7 +201,9 @@ public class CrazyStreams {
      * @return a map where key is a letter and value is its count in all first names
      */
     public Map<Character, Long> getCharacterFrequencyInFirstNames() {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .flatMap(account -> account.getFirstName().chars().mapToObj(ch -> (char)ch)) // Verify: ensure getFirstName()
+                .collect(Collectors.groupingBy(ch -> ch, Collectors.counting()));
     }
 
     /**
@@ -179,8 +214,17 @@ public class CrazyStreams {
      * @return a map where key is a letter and value is its count ignoring case in all first and last names
      */
     public Map<Character, Long> getCharacterFrequencyIgnoreCaseInFirstAndLastNames(int nameLengthBound) {
-        throw new ExerciseNotCompletedException();
+        return accounts.stream()
+                .flatMap(account -> {
+                    Stream<Character> firstNameChars = account.getFirstName().length() >= nameLengthBound
+                            ? account.getFirstName().chars().mapToObj(ch -> (char)ch)
+                            : Stream.empty();
+                    Stream<Character> lastNameChars = account.getLastName().length() >= nameLengthBound
+                            ? account.getLastName().chars().mapToObj(ch -> (char)ch)
+                            : Stream.empty();
+                    return Stream.concat(firstNameChars, lastNameChars);
+                })
+                .map(Character::toLowerCase)
+                .collect(Collectors.groupingBy(ch -> ch, Collectors.counting()));
     }
-
 }
-
